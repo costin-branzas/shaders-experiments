@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>My first three.js app</title>
+		
+		<style>
+			body { margin: 0; }
+		</style>
+
+		<!-- Having this script importmap defined allows importing from three as if serving / building the app with a node tool such as vite -->
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "./node_modules/three/build/three.module.js"
+				}
+			}
+		</script>
+
+	</head>
+	<body>
+		<script type="module" src="main.js"></script>
+	</body>
+</html>
