@@ -10,7 +10,7 @@ class MainThreeJSClass {
         document.body.appendChild(this.renderer.domElement);
         
         this.scene = new THREE.Scene();
-        this.camera = new THREE.OrthographicCamera(0, 1, 1, 0, 0.1, 1000);
+        this.camera = new THREE.OrthographicCamera(0, 1, 1, 0, 0.1, 100);
         this.camera.position.set(0, 0, 1);
 
         //shader based material
@@ -19,6 +19,8 @@ class MainThreeJSClass {
     
         const material = new THREE.ShaderMaterial({
           uniforms: {
+            color1: {value: new THREE.Vector4(1, 1, 0, 1)},
+            color2: {value: new THREE.Vector4(0, 1, 1, 1)},
           },
           vertexShader: await vsh.text(),
           fragmentShader: await fsh.text()
@@ -26,7 +28,8 @@ class MainThreeJSClass {
 
 
         const geometry = new THREE.PlaneGeometry(1, 1);
-      
+        console.log(geometry);
+
         this.plane = new THREE.Mesh(geometry, material);
         
         this.x = 0.5; 
