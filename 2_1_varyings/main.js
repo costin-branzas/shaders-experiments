@@ -28,28 +28,31 @@ class MainThreeJSClass {
         });
 
 
-        const geometry = new THREE.PlaneGeometry(0.1, 0.1);
+        const geometry = new THREE.PlaneGeometry(1, 1);
+        console.log(geometry);
       
         this.plane = new THREE.Mesh(geometry, material);
         
-        this.x = -0.05; 
+        this.x = 0.5; 
         this.y = 0.5;
-        this.z = 0.5;
+        this.z = 0;
         //this.x, this.y. this.z
         this.plane.position.set(this.x, this.y, this.z);
 
         this.scene.add(this.plane);
+
+        this.renderer.render(this.scene, this.camera);
         
-        this.renderer.setAnimationLoop(this.animate.bind(this));
+        //this.renderer.setAnimationLoop(this.animate.bind(this));
     }
 
-    animate() {
-        this.x += 0.01;
-        if (this.x > 1.05)
-            this.x = -0.05;
-        this.plane.position.set(this.x, this.y, this.z)
-        this.renderer.render(this.scene, this.camera);
-    }
+    // animate() {
+    //     this.x += 0.01;
+    //     if (this.x > 1.05)
+    //         this.x = -0.05;
+    //     this.plane.position.set(this.x, this.y, this.z)
+    //     this.renderer.render(this.scene, this.camera);
+    // }
 
 }
 
