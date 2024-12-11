@@ -14,5 +14,5 @@ void main() {
 
   //gl_FragColor = vec4(vec3(difusseSample.r), 1); //user r channel for all colours=> greyscale image
 
-  gl_FragColor = difusseSample * tint; //with tint
+  gl_FragColor = difusseSample * tint; //with tint (known as mutiplicative blending)
 }
