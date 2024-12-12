@@ -6,6 +6,7 @@ class MainThreeJSClass {
 
     async init() {
         this.renderer = new THREE.WebGLRenderer();
+        //console.log(this.renderer.getContext()); // this allows to inspect which webgl version we are using (2.0 normally, with glsl 3.0)
         this.renderer.setSize(500,500);
         document.body.appendChild(this.renderer.domElement);
         
@@ -14,8 +15,9 @@ class MainThreeJSClass {
         this.camera.position.set(0, 0, 1);
 
         //texture loading
-        const textureLoade = new THREE.TextureLoader();10
-        const dogTexture = textureLoade.load('./textures/cloud.jpg');
+        const textureLoader = new THREE.TextureLoader();10
+        const dogTexture = textureLoader.load('./textures/cloud.jpg');
+        const mountainTexture = textureLoader.load('./textures/mountain.jpg');
 
         //shader based material
         const vsh = await fetch('./shaders/vertex-shader.glsl');
@@ -23,7 +25,7 @@ class MainThreeJSClass {
     
         const material = new THREE.ShaderMaterial({
           uniforms: {
-            diffuse: {value: dogTexture},
+            diffuse: {value: mountainTexture},
             tint: {value: new THREE.Vector4(1, 0, 0, 1)}
           },
           vertexShader: await vsh.text(),

@@ -5,6 +5,8 @@ void main() {
 
   gl_Position = projectionMatrix * modelViewMatrix * localPosition;
 
+
+  //transfering the uv into the varying to use at fragment shader level, we can also "invert" the image here
   //does not invert
   varying_uv = uv; 
 
