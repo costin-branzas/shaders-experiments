@@ -5,11 +5,11 @@ uniform sampler2D diffuse; // this is basically the texture data, but saved in a
 uniform vec4 tint;
 
 void main() {
-  vec4 difusseSample = texture(diffuse, vec2(varying_uv.x, varying_uv.y)); //this was texture2D before in glsl 2.0, not it's jus ttexture
+  vec4 diffuseSample = texture(diffuse, vec2(varying_uv.x, varying_uv.y)); //this was texture2D before in glsl 2.0, not it's jus ttexture
   
   //gl_FragColor = difusseSample; //basic
 
-  gl_FragColor = vec4(difusseSample); //just to point that diffuseSample is a vec4
+  gl_FragColor = vec4(diffuseSample); //just to point that diffuseSample is a vec4
 
   //gl_FragColor = vec4(difusseSample.r, difusseSample.g, difusseSample.b, 1); // same as before just mroe explicit
 
