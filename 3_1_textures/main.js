@@ -15,7 +15,7 @@ class MainThreeJSClass {
         this.camera.position.set(0, 0, 1);
 
         //texture loading
-        const textureLoader = new THREE.TextureLoader();10
+        const textureLoader = new THREE.TextureLoader();
         const dogTexture = textureLoader.load('./textures/cloud.jpg');
         const mountainTexture = textureLoader.load('./textures/mountain.jpg');
 
