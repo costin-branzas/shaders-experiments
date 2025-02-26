@@ -10,20 +10,28 @@ void main() {
 
   float lineThikness = 0.0015;
   
+  // float interpolationControlForMix = v_uv.x;
+  float interpolationControlForMix = min(v_uv.x, 0.25);
+  // float interpolationControlForMix = max(v_uv.x, 0.25);
+  // float interpolationControlForMix = clamp(v_uv.x, 0.25, 0.75);
+  
+  // float interpolationControlForSmoothstep = v_uv.x;
+  float interpolationControlForSmoothstep = clamp(v_uv.x, 0.25, 0.75);
+
   // a horizontal line using step
   float horizontalLineIntensity = 1.0 - step(lineThikness, abs(v_uv.y - 0.5));
     
   // mixGraph
-  float mixGraphIntensity = 1.0 - step(lineThikness, abs(v_uv.y - mix(0.5, 1.0, mix(0.0, 1.0, v_uv.x))));
+  float mixGraphIntensity = 1.0 - step(lineThikness, abs(v_uv.y - mix(0.5, 1.0, mix(0.0, 1.0, interpolationControlForMix))));
 
   // smoothstepGraph
-  float smoothstepGraphIntensity = 1.0 - step(lineThikness, abs(v_uv.y - mix(0.0, 0.5, smoothstep(0.0, 1.0, v_uv.x))));
+  float smoothstepGraphIntensity = 1.0 - step(lineThikness, abs(v_uv.y - mix(0.0, 0.5, smoothstep(0.0, 1.0, interpolationControlForSmoothstep))));
 
   // background color
   if (v_uv.y > 0.5) {
-    finalColor = mix(red, blue, v_uv.x);
+    finalColor = mix(red, blue, interpolationControlForMix);
   } else {
-    finalColor = mix(red, blue, smoothstep(0.0, 1.0, v_uv.x));
+    finalColor = mix(red, blue, smoothstep(0.0, 1.0, interpolationControlForSmoothstep));
   }
 
   finalColor = mix(finalColor, white, horizontalLineIntensity);
