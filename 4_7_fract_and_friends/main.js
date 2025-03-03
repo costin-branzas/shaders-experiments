@@ -29,7 +29,7 @@ class MainThreeJSClass {
         });
 
 
-        const geometry = new THREE.PlaneGeometry(0.3, 0.3);
+        const geometry = new THREE.PlaneGeometry(1.0, 1.0);
       
         this.plane = new THREE.Mesh(geometry, this.material);
         
@@ -54,12 +54,6 @@ class MainThreeJSClass {
     }
 
     animate() {
-      this.x += 0.01;
-      if(this.x) {
-        this.x = 0.0;
-      }
-      this.plane.position.set(this.x, this.y, this.z);
-
       requestAnimationFrame(() => {
         this.renderer.render(this.scene, this.camera)
         this.animate();
