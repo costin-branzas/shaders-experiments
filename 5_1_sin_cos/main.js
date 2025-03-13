@@ -23,7 +23,8 @@ class MainThreeJSClass {
     
         this.material = new THREE.ShaderMaterial({
           uniforms: {
-            resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight)}
+            resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight)},
+            time: {value: 0.0}
           },
           vertexShader: await vsh.text(),
           fragmentShader: await fsh.text()
@@ -45,6 +46,9 @@ class MainThreeJSClass {
 
         //this.onWindowResize();
 
+        this.totalTime = 0.0;
+        this.totalTimeAtPreviousFrame = null;
+
         this.animate();
     }
 
@@ -60,10 +64,25 @@ class MainThreeJSClass {
       // }
       // this.plane.position.set(this.x, this.y, this.z);
 
-      requestAnimationFrame(() => {
+      requestAnimationFrame((t) => {
+        this.keepTrackOfTimeAndUpdateUniform(t);
+        
         this.renderer.render(this.scene, this.camera)
         this.animate();
+
+        this.totalTimeAtPreviousFrame = t;
       });
+    }
+
+    keepTrackOfTimeAndUpdateUniform(t) {
+      if(this.totalTimeAtPreviousFrame === null)
+        this.totalTimeAtPreviousFrame = t;
+
+      this.totalTime += (t - this.totalTimeAtPreviousFrame) * 0.001;
+
+      this.material.uniforms.time.value = this.totalTime;
+      // this.material.uniforms.time.value = t * 0.001; //not really sure why this isn't used...
+      // console.log(this.totalTime, "/", t * 0.001);
     }
 
 }
