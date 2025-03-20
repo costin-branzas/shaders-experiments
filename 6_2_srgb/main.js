@@ -19,7 +19,7 @@ class MainThreeJSClass {
         this.scene = new THREE.Scene();
         // this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1000, 1000);
         this.camera = new THREE.PerspectiveCamera(60, 1/1, 0.1, 1000.0);
-        this.camera.position.set(1, 1, 4);
+        this.camera.position.set(-2, 0, 4);
 
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.target.set(0, 0, 0);
@@ -70,7 +70,7 @@ class MainThreeJSClass {
         // this.box.position.set(0.0, 0.0, 0.0);
         // this.scene.add(this.box);
 
-        const sphereGeometry = new THREE.SphereGeometry(1.25, 20, 20);
+        const sphereGeometry = new THREE.SphereGeometry(1.25, 50, 50);
         this.sphere = new THREE.Mesh(sphereGeometry, this.material);
         this.sphere.position.set(0.0, 0.0, 0.0);
         this.scene.add(this.sphere);

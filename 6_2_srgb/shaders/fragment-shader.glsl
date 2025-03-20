@@ -53,11 +53,12 @@ void main() {
 
 
   // Final mixing of lighting
-  vec3 totalLighting = ambientLighting * 0.5 + hemiLighting * 0.3 + diffuseLight * 1.0;
+  vec3 totalLighting = ambientLighting * 0.0 + hemiLighting * 0.0 + diffuseLight * 1.0;
 
   vec3 finalColor = baseColour * totalLighting;
 
-  finalColor = linearTosRGB(finalColor);
+  // finalColor = linearTosRGB(finalColor);
+  finalColor = pow(finalColor, vec3(1.0 / 2.2)); //approximation
 
   gl_FragColor = vec4(finalColor, 1.0);
 }
