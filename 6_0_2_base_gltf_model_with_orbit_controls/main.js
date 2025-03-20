@@ -35,22 +35,22 @@ class MainThreeJSClass {
           vertexShader: await vsh.text(),
           fragmentShader: await fsh.text()
         });
-
-        // const geometry = new THREE.PlaneGeometry(1.0, 1.0);
-        // const boxGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-        // const sphereGeometry = new THREE.SphereGeometry(0.25, 20, 20);
-      
-        // this.box = new THREE.Mesh(boxGeometry, this.material);
-        // this.sphere = new THREE.Mesh(sphereGeometry, this.material);
-        
-        // this.box.position.set(-0.5, 0.0, 0.0);
-        // this.sphere.position.set(0.5, 0.0, 0.0);
-
-        // this.scene.add(this.box);
-        // this.scene.add(this.sphere);
         
         const loader = new GLTFLoader();
-        loader.setPath('./resources');
+        loader.setPath('./resources/');
+        const modelName = 'suzanne.glb';
+        // const modelName = 'giant_low_poly_tree.glb';
+        //const modelName = 'low_poly_tree_pack.glb';
+        // const modelName = 'low_poly_tree.glb';
+        loader.load(modelName, (gltf) => {
+          gltf.scene.traverse(c => {
+            c.material = this.material;
+          });
+          const model = gltf.scene;
+          // model.material = this.material;
+          this.scene.add(model);
+          console.log(gltf);
+        });
 
         //this.onWindowResize();
 
