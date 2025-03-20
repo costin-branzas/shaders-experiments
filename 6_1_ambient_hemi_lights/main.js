@@ -66,6 +66,11 @@ class MainThreeJSClass {
           // console.log(gltf);
         });
 
+        const sphereGeometry = new THREE.SphereGeometry(0.25, 20, 20);
+        this.sphere = new THREE.Mesh(sphereGeometry, this.material);
+        this.sphere.position.set(-1.5, 0.0, 0.0);
+        this.scene.add(this.sphere);
+
         // this.onWindowResize();
 
         this.animate();
