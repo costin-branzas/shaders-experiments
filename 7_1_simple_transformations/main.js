@@ -18,7 +18,7 @@ class MainThreeJSClass {
         this.scene = new THREE.Scene();
         // this.camera = new THREE.OrthographicCamera(0, 1, 1, 0, 0.1, 1000);
         this.camera = new THREE.PerspectiveCamera(60, 1/1, 0.1, 1000.0);
-        this.camera.position.set(1, 1, 2);
+        this.camera.position.set(0, 0, 3);
 
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.target.set(0, 0, 0);
