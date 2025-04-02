@@ -114,7 +114,7 @@ void main() {
   // float d = sdfHexagon(pixelCoords, 100.0);
   // color = mix(red, color, step(0.0, d));
 
-  //transformations
+  //transformations - applied to current fragment for which this shader is running
   vec2 pos = pixelCoords;
   
   pos = pos - vec2(100.0, 50.0);//translation
@@ -124,9 +124,7 @@ void main() {
   // pos = pos * rotate2D(time * 1.0);
   // pos = pos - vec2(100.0, 50.0);
   
-  
-
-  //translation
+  //draw (compute) the box
   float d = sdfBox(pos, vec2(100.0, 50.0));
   color = mix(red, color, step(0.0, d));
 
