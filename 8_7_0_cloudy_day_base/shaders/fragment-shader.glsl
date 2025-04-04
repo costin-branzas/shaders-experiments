@@ -70,19 +70,35 @@ float sdfCloud(vec2 pixelCoords) {
   return cloud;
 }
 
+float hash(vec2 v) {
+  float t = dot(v, vec2(36.5323, 73.945));
+  return sin(t);
+}
+
 void main() {
-  vec2 pixelCoords = (v_uv - 0.5) * resolution;
+  vec2 pixelCoords = v_uv * resolution; //note that i removed v_uv - 0.5, so we'll need to add it back in later
 
   vec3 color = drawBackground();
 
-  float cloudShadow = sdfCloud(pixelCoords + vec2(50.0));
-  color = mix(color, black, 0.5 * smoothstep(0.0, -1.0, cloudShadow));
+  const float NUM_CLOUDS = 8.0;
 
+  for(float i = 0.0; i < NUM_CLOUDS; i += 1.0) {
+    float size = mix(2.0, 1.0, (i / NUM_CLOUDS) + 0.1 * hash(vec2(i)));
+    float speed = size * 0.25;
 
-  float cloud = sdfCloud(pixelCoords - vec2(0.0, 0.0));
-  color = mix(white, color, smoothstep(0.0, 1.0, cloud));
+    vec2 offset = vec2(i * 200.0 + time * 100.0 * speed, 200.0 * hash(vec2(i))); // move by 100 pixels / second
+    vec2 pos = pixelCoords - offset;
+
+    pos = mod(pos, resolution);
+    pos = pos - resolution * 0.5; // this is basically where add back in "v_uv - 0.5", but here we do it by multiplying res by 0.5 (i don't fully understand this...)
+    
+    float cloudShadow = sdfCloud(pos * size + vec2(25.0)) - 40.0;
+    color = mix(color, black, 0.5 * smoothstep(0.0, -100.0, cloudShadow));
+
+    float cloud = sdfCloud(pos * size - vec2(0.0, 0.0));
+    color = mix(white, color, smoothstep(-1.0, 1.0, cloud));
+  }
   
-
   // color = pow(color, vec3(1.0 / 2.2)); //approximation
 
   gl_FragColor = vec4(color, 1.0);
