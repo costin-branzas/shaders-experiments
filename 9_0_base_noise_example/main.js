@@ -9,6 +9,7 @@ class MainThreeJSClass {
 
     async init() {
         this.renderer = new THREE.WebGLRenderer();
+        console.log("renderer:", this.renderer);
         document.body.appendChild(this.renderer.domElement);
         
         window.addEventListener('resize', () => {
