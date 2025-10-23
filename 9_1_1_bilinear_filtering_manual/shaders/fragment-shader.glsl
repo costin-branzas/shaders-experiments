@@ -42,13 +42,13 @@ uniform sampler2D simple4PixelTexture; // the texture we will sample from
 //version by simon with some renamings and comments added by me (Costin) for better understanding
 vec4 filteredSampleCostin(sampler2D originalTexture, vec2 coords) {
   vec2 textureSize = vec2(2.0);
-  vec2 pixelCoords = coords * textureSize + 0.5; // transform coords from 0-1 to 0-textureSize, so basically 0-2 in this case and we substract 0.5 to make sure we actually target pixel centers (0.5 and 1.5)
-  vec2 base = floor(pixelCoords) - 0.5; // this will be, in our case, either 0 or 1 + 0.5, so either 0.5 or 1.5 (the centers of the pixels)
+  vec2 pixelCoords = coords * textureSize + 0.5; // transform coords from 0-1 to 0-textureSize, so basically 0-2 in this case and we substract 0.5 resulting in -0.5 to 1.5 range
+  vec2 base = floor(pixelCoords) - 0.5; // this will be, in our case, either -1.0 or 1.0 - 0.5, so either -1.5 or 0.5
 
-  vec4 bottomLeft = texture(originalTexture, (base + vec2(0.0, 0.0)) / textureSize);
-  vec4 bottomRight = texture(originalTexture, (base + vec2(1.0, 0.0)) / textureSize);
-  vec4 topLeft = texture(originalTexture, (base + vec2(0.0, 1.0)) / textureSize);
-  vec4 topRight = texture(originalTexture, (base + vec2(1.0, 1.0)) / textureSize);
+  vec4 bottomLeft = texture(originalTexture, (base + vec2(0.0, 0.0)) / textureSize); // will sample from interval (-1.5 / 2.0 = -0.75) -> (0.5 / 2.0 = 0.25); x and y: -0.75 -> 0.25
+  vec4 bottomRight = texture(originalTexture, (base + vec2(1.0, 0.0)) / textureSize); // for uv.x will sample from interval (-0.5 / 2.0 = -0.25) -> (1.5 / 2.0 = 0.75); x: -0.25 -> 0.75
+  vec4 topLeft = texture(originalTexture, (base + vec2(0.0, 1.0)) / textureSize); // for uv.y will sample from interval (-0.5 / 2.0 = -0.25) -> (1.5 / 2.0 = 0.75); y: -0.25 -> 0.75
+  vec4 topRight = texture(originalTexture, (base + vec2(1.0, 1.0)) / textureSize); //will sample from interval (-0.5 / 2.0 = -0.25) -> (1.5 / 2.0 = 0.75); x and y: -0.25 -> 0.75
   
   // vec2 fractPartOfPixelCoords = fract(pixelCoords); // where in the "cell" are we?
   // vec2 fractPartOfPixelCoords = smoothstep(0.0, 1.0, fract(pixelCoords)); // smoothstep instead of linear interpolation
@@ -86,7 +86,8 @@ vec4 filteredSample(sampler2D target, vec2 coords) {
 void main() {
   
   // vec4 textureSample = texture(simple4PixelTexture, v_uv);//use normal texture filtering (as defined in main.js)
-  vec4 textureSample = filteredSample(simple4PixelTexture, v_uv);
+  // vec4 textureSample = filteredSample(simple4PixelTexture, v_uv);
+  vec4 textureSample = filteredSampleCostin(simple4PixelTexture, v_uv);
   
   // try and experiment to see if v_uv.x can reach 1.0
   // if (v_uv.x == 1.0)
