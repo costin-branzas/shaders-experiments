@@ -42,7 +42,7 @@ uniform sampler2D simple4PixelTexture; // the texture we will sample from
 //version by simon with some renamings and comments added by me (Costin) for better understanding
 vec4 filteredSampleCostin(sampler2D originalTexture, vec2 coords) {
   vec2 textureSize = vec2(2.0);
-  vec2 pixelCoords = coords * textureSize + 0.5; // transform coords from 0-1 to 0-textureSize, so basically 0-2 in this case and we substract 0.5 resulting in -0.5 to 1.5 range
+  vec2 pixelCoords = coords * textureSize +  0.5; // transform coords from 0-1 to 0-textureSize, so basically 0-2 in this case and we substract 0.5 resulting in -0.5 to 1.5 range
   vec2 base = floor(pixelCoords) - 0.5; // this will be, in our case, either -1.0 or 1.0 - 0.5, so either -1.5 or 0.5
 
   vec4 bottomLeft = texture(originalTexture, (base + vec2(0.0, 0.0)) / textureSize); // will sample from interval (-1.5 / 2.0 = -0.75) -> (0.5 / 2.0 = 0.25); x and y: -0.75 -> 0.25
@@ -50,9 +50,9 @@ vec4 filteredSampleCostin(sampler2D originalTexture, vec2 coords) {
   vec4 topLeft = texture(originalTexture, (base + vec2(0.0, 1.0)) / textureSize); // for uv.y will sample from interval (-0.5 / 2.0 = -0.25) -> (1.5 / 2.0 = 0.75); y: -0.25 -> 0.75
   vec4 topRight = texture(originalTexture, (base + vec2(1.0, 1.0)) / textureSize); //will sample from interval (-0.5 / 2.0 = -0.25) -> (1.5 / 2.0 = 0.75); x and y: -0.25 -> 0.75
   
-  // vec2 fractPartOfPixelCoords = fract(pixelCoords); // where in the "cell" are we?
+  vec2 fractPartOfPixelCoords = fract(pixelCoords); // where in the "cell" are we?
   // vec2 fractPartOfPixelCoords = smoothstep(0.0, 1.0, fract(pixelCoords)); // smoothstep instead of linear interpolation
-  vec2 fractPartOfPixelCoords = smoothstep(0.49, 0.51, fract(pixelCoords)); // some adjustent to smoothstep to make the transition sharper
+  // vec2 fractPartOfPixelCoords = smoothstep(0.49, 0.51, fract(pixelCoords)); // some adjustent to smoothstep to make the transition sharper
 
   vec4 mixBottomValues = mix(bottomLeft, bottomRight, fractPartOfPixelCoords.x);
   vec4 mixTopValues = mix(topLeft, topRight, fractPartOfPixelCoords.x);
@@ -98,5 +98,10 @@ void main() {
   // experiment to see the value of v_uv
   // gl_FragColor = vec4(v_uv.y, 0.0, 0.0, 1.0);
 
+  // vec3 red = vec3(1.0, 0.0, 0.0);
+  // vec3 green = vec3(0.0, 1.0, 0.0);
+  // vec3 color = mix(red, green, v_uv.x);
+  // gl_FragColor = vec4(color, 1.0);
+  
   gl_FragColor = textureSample;
 }
