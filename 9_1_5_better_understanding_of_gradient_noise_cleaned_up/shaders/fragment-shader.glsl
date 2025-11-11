@@ -57,6 +57,8 @@ vec3 gradientNoise(vec2 uv, float gridSize) {
   float topLeftDotProduct = dot(topLeftCornerVector, topLeftToCurrentPosVector);
   float topRightDotProduct = dot(topRightCornerVector, topRightToCurrentPosVector);
 
+  gridPosDetail = smoothstep(0.0, 1.0, gridPosDetail);
+
   float bottomColour = mix(bottomLeftDotProduct, bottomRightDotProduct, gridPosDetail.x);
   float topColour = mix(topLeftDotProduct, topRightDotProduct, gridPosDetail.x);
 
@@ -66,26 +68,28 @@ vec3 gradientNoise(vec2 uv, float gridSize) {
 }
 
 
-// vec3 fractalGradientNoise(vec2 uv, float gridSize, float octaves) {
-//   vec3 composedGradientNoise = vec3(0.0);
+vec3 fractalGradientNoise(vec2 uv, float gridSize, float octaves) {
+  vec3 composedGradientNoise = vec3(0.0);
 
-//   float amplitude = 0.5;
-//   float frequency = 1.0;
+  float amplitude = 0.5;
+  float frequency = 1.0;
 
-//   for (float i = 0.0; i < octaves; i += 1.0) {
-//     composedGradientNoise += amplitude * gradientNoise(uv, gridSize * frequency); // grid size is basically frequency, we mutiply it to increase it, so frequency would be better called "frequency coefficient"
-//     amplitude *= 0.5;
-//     frequency *= 2.0;
-//   }
+  for (float i = 0.0; i < octaves; i += 1.0) {
+    composedGradientNoise += amplitude * gradientNoise(uv, gridSize * frequency); // grid size is basically frequency, we mutiply it to increase it, so frequency would be better called "frequency coefficient"
+    amplitude *= 0.5;
+    frequency *= 2.0;
+  }
   
-//   return composedGradientNoise;
-// }
+  return composedGradientNoise;
+}
 
 
 void main() {
   vec3 colour = vec3(0.0, 0.0, 0.0);
 
-  colour = gradientNoise(v_uv, 5.0); 
+  colour = gradientNoise(v_uv, 5.0);
+  // colour = fractalGradientNoise(v_uv, 5.0, 3.0);
+
 
   gl_FragColor = vec4(colour, 1.0);
 }
