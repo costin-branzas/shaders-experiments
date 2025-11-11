@@ -35,17 +35,19 @@ vec2 randomGradient(uvec3 v) {
 }
 
 
-vec3 gradientNoise(vec2 uv, float gridSize) {
-  vec2 gridCoords = uv * gridSize;
+vec3 gradientNoise(vec3 gradientSeed, float gridSize) {
+  
+  float time = gradientSeed.z;
+  vec2 gridCoords = gradientSeed.xy * gridSize;
 
   vec2 gridPosBase = floor(gridCoords);
   vec2 gridPosDetail = fract(gridCoords);
 
 
-  vec2 bottomLeftCornerVector = randomGradient(uvec3(gridPosBase.x, gridPosBase.y, 0.0));
-  vec2 bottomRightCornerVector = randomGradient(uvec3(gridPosBase.x + 1.0, gridPosBase.y, 0.0));
-  vec2 topLeftCornerVector = randomGradient(uvec3(gridPosBase.x, gridPosBase.y + 1.0, 0.0));
-  vec2 topRightCornerVector = randomGradient(uvec3(gridPosBase.x + 1.0, gridPosBase.y + 1.0, 0.0));
+  vec2 bottomLeftCornerVector = randomGradient(uvec3(gridPosBase.x, gridPosBase.y, time));
+  vec2 bottomRightCornerVector = randomGradient(uvec3(gridPosBase.x + 1.0, gridPosBase.y, time));
+  vec2 topLeftCornerVector = randomGradient(uvec3(gridPosBase.x, gridPosBase.y + 1.0, time));
+  vec2 topRightCornerVector = randomGradient(uvec3(gridPosBase.x + 1.0, gridPosBase.y + 1.0, time));
 
   vec2 bottomLeftToCurrentPosVector = gridPosDetail;
   vec2 bottomRightToCurrentPosVector = gridPosDetail - vec2(1.0, 0.0);
@@ -68,14 +70,14 @@ vec3 gradientNoise(vec2 uv, float gridSize) {
 }
 
 
-vec3 fractalGradientNoise(vec2 uv, float gridSize, float octaves) {
+vec3 fractalGradientNoise(vec3 gradientSeed, float gridSize, float octaves) {
   vec3 composedGradientNoise = vec3(0.0);
 
   float amplitude = 0.5;
   float frequency = 1.0;
 
   for (float i = 0.0; i < octaves; i += 1.0) {
-    composedGradientNoise += amplitude * gradientNoise(uv, gridSize * frequency); // grid size is basically frequency, we mutiply it to increase it, so frequency would be better called "frequency coefficient"
+    composedGradientNoise += amplitude * gradientNoise(gradientSeed, gridSize * frequency); // grid size is basically frequency, we mutiply it to increase it, so frequency would be better called "frequency coefficient"
     amplitude *= 0.5;
     frequency *= 2.0;
   }
@@ -87,9 +89,10 @@ vec3 fractalGradientNoise(vec2 uv, float gridSize, float octaves) {
 void main() {
   vec3 colour = vec3(0.0, 0.0, 0.0);
 
-  colour = gradientNoise(v_uv, 5.0);
-  // colour = fractalGradientNoise(v_uv, 5.0, 3.0);
+  vec3 gradientSeed = vec3(v_uv, time);
 
+  colour = gradientNoise(gradientSeed, 5.0);
+  // colour = fractalGradientNoise(v_uv, 5.0, 3.0);
 
   gl_FragColor = vec4(colour, 1.0);
 }
