@@ -89,10 +89,10 @@ vec3 fractalGradientNoise(vec3 gradientSeed, float gridSize, float octaves) {
 void main() {
   vec3 colour = vec3(0.0, 0.0, 0.0);
 
-  vec3 gradientSeed = vec3(v_uv, time);
+  vec3 gradientSeed = vec3(v_uv, time * 0.0);
 
-  colour = gradientNoise(gradientSeed, 5.0);
-  // colour = fractalGradientNoise(v_uv, 5.0, 3.0);
+  // colour = gradientNoise(gradientSeed, 5.0);
+  colour = fractalGradientNoise(gradientSeed, 5.0, 3.0);
 
   gl_FragColor = vec4(colour, 1.0);
 }
