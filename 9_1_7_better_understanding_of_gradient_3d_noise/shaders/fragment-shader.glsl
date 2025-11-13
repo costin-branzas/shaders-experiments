@@ -89,7 +89,8 @@ vec3 gradientNoise(vec3 gradientSeed, float gridSize) {
 
   float finalValue = mix(near, far, gridPosDetail.z);
 
-  finalValue = remap(finalValue, -0.5, 0.5, 0.0, 0.6);
+  finalValue = remap(finalValue, -0.5, 0.5, 0.0, 1.0);
+  finalValue = smoothstep(0.4, 0.41, finalValue);
 
   vec3 finalColour = vec3(finalValue);
 
@@ -100,7 +101,7 @@ vec3 gradientNoise(vec3 gradientSeed, float gridSize) {
 vec3 fractalGradientNoise(vec3 gradientSeed, float gridSize, float octaves) {
   vec3 composedGradientNoise = vec3(0.0);
 
-  float amplitude = 0.5;
+  float amplitude = 1.0;
   float frequency = 1.0;
 
   for (float i = 0.0; i < octaves; i += 1.0) {
@@ -119,7 +120,7 @@ void main() {
   vec3 gradientSeed = vec3(v_uv, time * 0.5);
 
   // colour = gradientNoise(gradientSeed, 5.0);
-  colour = fractalGradientNoise(gradientSeed, 10.0, 6.0);
+  colour = fractalGradientNoise(gradientSeed, 10.0, 1.0);
 
   gl_FragColor = vec4(colour, 1.0);
 }
