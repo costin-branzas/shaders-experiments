@@ -33,40 +33,65 @@ vec3 randomGradient(uvec3 v) {
   float y = radius * sin(angle);
   float z = randomValues.z * 2.0 - 1.0; // a bit of a hack to get a z component
   
-  return vec3(x, y, 0.0);
+  return vec3(x, y, z);
 }
 
 
 vec3 gradientNoise(vec3 gradientSeed, float gridSize) {
   
-  float time = gradientSeed.z;
-  vec2 gridCoords = gradientSeed.xy * gridSize;
+  vec3 gridCoords = vec3(gradientSeed.xy * gridSize, gradientSeed.z); // only scale x and y, z represents time here, no need to scale it here
 
-  vec2 gridPosBase = floor(gridCoords);
-  vec2 gridPosDetail = fract(gridCoords);
+  vec3 gridPosBase = floor(gridCoords);
+  vec3 gridPosDetail = fract(gridCoords);
 
 
-  vec2 bottomLeftCornerVector = randomGradient(uvec3(gridPosBase.x, gridPosBase.y, time));
-  vec2 bottomRightCornerVector = randomGradient(uvec3(gridPosBase.x + 1.0, gridPosBase.y, time));
-  vec2 topLeftCornerVector = randomGradient(uvec3(gridPosBase.x, gridPosBase.y + 1.0, time));
-  vec2 topRightCornerVector = randomGradient(uvec3(gridPosBase.x + 1.0, gridPosBase.y + 1.0, time));
+  vec3 near1 = randomGradient(uvec3(gridPosBase.x, gridPosBase.y, gridPosBase.z));
+  vec3 near2 = randomGradient(uvec3(gridPosBase.x + 1.0, gridPosBase.y, gridPosBase.z));
+  vec3 near3 = randomGradient(uvec3(gridPosBase.x, gridPosBase.y + 1.0, gridPosBase.z));
+  vec3 near4 = randomGradient(uvec3(gridPosBase.x + 1.0, gridPosBase.y + 1.0, gridPosBase.z));
+  
+  vec3 far1 = randomGradient(uvec3(gridPosBase.x, gridPosBase.y, gridPosBase.z + 1.0));
+  vec3 far2 = randomGradient(uvec3(gridPosBase.x + 1.0, gridPosBase.y, gridPosBase.z + 1.0));
+  vec3 far3 = randomGradient(uvec3(gridPosBase.x, gridPosBase.y + 1.0, gridPosBase.z + 1.0));
+  vec3 far4 = randomGradient(uvec3(gridPosBase.x + 1.0, gridPosBase.y + 1.0, gridPosBase.z + 1.0));
 
-  vec2 bottomLeftToCurrentPosVector = gridPosDetail;
-  vec2 bottomRightToCurrentPosVector = gridPosDetail - vec2(1.0, 0.0);
-  vec2 topLeftToCurrentPosVector = gridPosDetail - vec2(0.0, 1.0);
-  vec2 topRightToCurrentPosVector = gridPosDetail - vec2(1.0, 1.0);
 
-  float bottomLeftDotProduct = dot(bottomLeftCornerVector, bottomLeftToCurrentPosVector);
-  float bottomRightDotProduct = dot(bottomRightCornerVector, bottomRightToCurrentPosVector);
-  float topLeftDotProduct = dot(topLeftCornerVector, topLeftToCurrentPosVector);
-  float topRightDotProduct = dot(topRightCornerVector, topRightToCurrentPosVector);
+  vec3 near1ToCurrentPos = gridPosDetail - vec3(0.0, 0.0, 0.0);
+  vec3 near2ToCurrentPos = gridPosDetail - vec3(1.0, 0.0, 0.0);
+  vec3 near3ToCurrentPos = gridPosDetail - vec3(0.0, 1.0, 0.0);
+  vec3 near4ToCurrentPos = gridPosDetail - vec3(1.0, 1.0, 0.0);
 
+  vec3 far1ToCurrentPos = gridPosDetail - vec3(0.0, 0.0, 1.0);
+  vec3 far2ToCurrentPos = gridPosDetail - vec3(1.0, 0.0, 1.0);
+  vec3 far3ToCurrentPos = gridPosDetail - vec3(0.0, 1.0, 1.0);
+  vec3 far4ToCurrentPos = gridPosDetail - vec3(1.0, 1.0, 1.0);
+
+
+  float dotNear1 = dot(near1, near1ToCurrentPos);
+  float dotNear2 = dot(near2, near2ToCurrentPos);
+  float dotNear3 = dot(near3, near3ToCurrentPos);
+  float dotNear4 = dot(near4, near4ToCurrentPos);
+  float dotFar1 = dot(far1, far1ToCurrentPos);
+  float dotFar2 = dot(far2, far2ToCurrentPos);
+  float dotFar3 = dot(far3, far3ToCurrentPos);
+  float dotFar4 = dot(far4, far4ToCurrentPos);
+
+  // gridPosDetail = gridPosDetail * gridPosDetail * (3.0 - 2.0 * gridPosDetail);
   gridPosDetail = smoothstep(0.0, 1.0, gridPosDetail);
 
-  float bottomColour = mix(bottomLeftDotProduct, bottomRightDotProduct, gridPosDetail.x);
-  float topColour = mix(topLeftDotProduct, topRightDotProduct, gridPosDetail.x);
+  float nearBottom = mix(dotNear1, dotNear2, gridPosDetail.x);
+  float nearTop = mix(dotNear3, dotNear4, gridPosDetail.x);
+  float farBottom = mix(dotFar1, dotFar2, gridPosDetail.x);
+  float farTop = mix(dotFar3, dotFar4, gridPosDetail.x);
+  
+  float near = mix(nearBottom, nearTop, gridPosDetail.y);
+  float far = mix(farBottom, farTop, gridPosDetail.y);
 
-  vec3 finalColour = vec3(mix(bottomColour, topColour, gridPosDetail.y) + 0.5);
+  float finalValue = mix(near, far, gridPosDetail.z);
+
+  finalValue = remap(finalValue, -0.5, 0.5, 0.0, 0.6);
+
+  vec3 finalColour = vec3(finalValue);
 
   return finalColour;
 }
@@ -91,10 +116,10 @@ vec3 fractalGradientNoise(vec3 gradientSeed, float gridSize, float octaves) {
 void main() {
   vec3 colour = vec3(0.0, 0.0, 0.0);
 
-  vec3 gradientSeed = vec3(v_uv, time * 0.0);
+  vec3 gradientSeed = vec3(v_uv, time * 0.5);
 
   // colour = gradientNoise(gradientSeed, 5.0);
-  colour = fractalGradientNoise(gradientSeed, 5.0, 3.0);
+  colour = fractalGradientNoise(gradientSeed, 10.0, 6.0);
 
   gl_FragColor = vec4(colour, 1.0);
 }
