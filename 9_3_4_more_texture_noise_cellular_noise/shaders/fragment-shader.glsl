@@ -124,19 +124,26 @@ float cellularNoise(vec3 seed) {
       vec2 neighbouringCellOffset = vec2(x, y);
       vec2 neighbouringCellAbsPos = gridBase + neighbouringCellOffset;
 
+      // cellOffset is a bad name, it's actually the random point chosen within the cell, basically the "feature point" as known in cellular noise
       // vec2 cellOffset = vec2(
       //   noise(vec3(neighbouringCellAbsPos, seed.z) + vec3(1.1, 1.5, 2.0)),
       //   noise(vec3(neighbouringCellAbsPos, seed.z))
       // );
 
-      vec2 cellOffset = vec2(
-        noise(vec3(neighbouringCellAbsPos, seed.z)),
-        noise(vec3(neighbouringCellAbsPos, seed.z))
-      );
+      // vec2 cellOffset = vec2(
+      //   noise(vec3(neighbouringCellAbsPos, seed.z)),
+      //   noise(vec3(neighbouringCellAbsPos, seed.z))
+      // );
 
       // vec2 cellOffset = vec2(noise(vec3(neighbouringCellAbsPos, seed.z)), 0.5);
 
-      float distToNeighbour = length(neighbouringCellOffset + cellOffset - gridFraction);
+      vec2 cellFeaturePoint = vec2(
+        noise(vec3(neighbouringCellAbsPos, seed.z)),
+        noise(vec3(neighbouringCellAbsPos, seed.z) + vec3(1.1, 1.5, 2.0)) // adding something to the 2nd point to ensure that the feature points are not moving corelated (x and y should not be related)
+      );
+
+      vec2 distanceToNeighbouringCellFeaturePoint = neighbouringCellOffset + cellFeaturePoint;
+      float distToNeighbour = length(distanceToNeighbouringCellFeaturePoint - gridFraction); // gridFraction is the position within the current cell
       
       closest = min(closest, distToNeighbour);
     }
