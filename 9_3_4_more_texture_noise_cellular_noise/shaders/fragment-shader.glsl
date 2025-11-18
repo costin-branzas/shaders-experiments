@@ -124,10 +124,17 @@ float cellularNoise(vec3 seed) {
       vec2 neighbouringCellOffset = vec2(x, y);
       vec2 neighbouringCellAbsPos = gridBase + neighbouringCellOffset;
 
+      // vec2 cellOffset = vec2(
+      //   noise(vec3(neighbouringCellAbsPos, seed.z) + vec3(1.1, 1.5, 2.0)),
+      //   noise(vec3(neighbouringCellAbsPos, seed.z))
+      // );
+
       vec2 cellOffset = vec2(
-        noise(vec3(neighbouringCellAbsPos, seed.z) + vec3(243.432, 324.235, 0.0)),
+        noise(vec3(neighbouringCellAbsPos, seed.z)),
         noise(vec3(neighbouringCellAbsPos, seed.z))
       );
+
+      // vec2 cellOffset = vec2(noise(vec3(neighbouringCellAbsPos, seed.z)), 0.5);
 
       float distToNeighbour = length(neighbouringCellOffset + cellOffset - gridFraction);
       
