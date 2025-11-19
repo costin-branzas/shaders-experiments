@@ -155,10 +155,10 @@ float cellularNoise(vec3 seed) {
   return closest;
 }
 
-float steppedNoise(float noiseSample, float steps) { // steps isn't reallt steps... not sure what to call it
-  float steppedSample = floor(noiseSample * steps) / steps;
-  float remainder = fract(noiseSample * steps);
-  steppedSample = (steppedSample - remainder) + 0.5;
+float steppedNoise(float noiseSample) {
+  float steppedSample = floor(noiseSample * 10.0) / 10.0;
+  float remainder = fract(noiseSample * 10.0);
+  steppedSample = (steppedSample - remainder) * 0.5 + 0.5; // this line is a bit of a mistery... this whole function seems to basically invert the gradients of color, but in "steps". there has to be a better way of doing this...
   
   return steppedSample;
 }
@@ -184,7 +184,7 @@ void main() {
   //stepped noise
   float noiseSample = noise(gridSeed);
   noiseSample = remap(noiseSample, -1.0, 1.0, 0.0, 1.0);
-  float steppedNoiseSample = steppedNoise(noiseSample, 10.0);
+  float steppedNoiseSample = steppedNoise(noiseSample);
 
   colour = vec3(steppedNoiseSample);
 
