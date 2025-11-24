@@ -68,20 +68,83 @@ vec3 GenerateSky() {
   vec3 color1 = vec3(0.4, 0.6, 0.9);
   vec3 color2 = vec3(0.1, 0.15, 1.4);
 
-  vec3 skyColour = mix(color1, color2, smoothstep(0.0, 1.0, v_uv.y));
+  vec3 skyColour = mix(color1, color2, smoothstep(0.875, 1.0, v_uv.y));
 
   return skyColour;
 }
 
-// vec3 DrawMountains() {
+vec3 DrawMountains(vec3 background, vec3 mountainColour, vec2 pixelCoords, float depth) {
+  // just to ilustrate the magic numbers - because sin is expecting rads as input, and returning [-1,1], we divide horiz pixel coord by horiz resolution to get [-1, 1]  values, then mutiply by 2 pi to basically get the entire range of radians (0 - 2pi)
+  // float mountainLine = sin(pixelCoords.x / resolution.x * 6.28); // here y is the height of the mountain at this x position
+  // mountainLine *= resolution.y / 2.0; // the result of sin is in [-1, 1] range, so we mutiply by resolution to make sure we actually see something (the divide by 2 is needed because we are offset from the bottom left... i think)
 
-// }
+  // simple version with actual numbers so that output looks good - using sin
+  // float mountainLine = sin(pixelCoords.x / 64.0); // wave frequency / how many radians we cover
+  // mountainLine *= 64.0; // how high
+
+  // using fbm instead of sin
+  //adding depth to x, to basically have a different seed for each of the mountains depending on the depth of the mountain chain...
+  vec3 fbmSeed = vec3(depth + pixelCoords.x / 256.0, 1.432, 3.643); // 1st param is basically the frequency along the x axis - lower number means more rough terrain, higher is smoother, other 2 params are just noise seeds, can be random (but they are basically the same as x - frequencies but in the y and z directions)
+  float mountainLine = fbm(fbmSeed, 6, 0.5, 2.0);
+  mountainLine *= 256.0; // how high
+
+  //fog
+  vec3 fogColour = vec3(0.4, 0.6, 0.9); // this is the same colour used for the sky - lower to the horizon
+  // float fogFactor = depth * 0.00005; // retarded verison
+  float fogFactor = smoothstep(0.0, 8000.0, depth) * 0.5; // better verison - with smoothstep, but to be honest, it's just a matter of fidling with the numbers, the above version can work just as well...
+  
+
+  //fog at the base of the mountains
+  float heightFactor = smoothstep(256.0, -512.0, pixelCoords.y);
+  heightFactor *= heightFactor;
+  fogFactor = mix(heightFactor, fogFactor, fogFactor);
+  
+  // final fog
+  mountainColour = mix(mountainColour, fogColour, fogFactor);
+
+  float sdfMountain = pixelCoords.y - mountainLine; // signed distance from the mountain surface (the sine wave basically)
+  
+  float blur = 1.0; // this blurs all mountains equally
+  blur += smoothstep(500.0, 6000.0, depth) * 128.0; // blurs mountains starting from distance 200 (close mountains will basically have NO blur - we need to add that separately)
+  
+  blur += smoothstep(500.0, -500.0, depth) * 128.0;
+  
+  vec3 colour = mix(mountainColour, background, smoothstep(0.0, blur, sdfMountain));
+
+  return colour;
+}
 
 
 void main() {
+  vec2 pixelCoords = (v_uv - 0.5) * resolution; // substracting 0.5 from v_uv will basically make the 0,0 coordinate be in the center of the screen, as oposed to having it at the bottom left corner
   vec3 colour = vec3(0.0, 0.0, 0.0);
- 
+   
   colour = GenerateSky();
+
+  vec2 timeOffset = vec2(time * 50.0, 0.0);
+
+  vec2 mountainCoords = (pixelCoords - vec2(0.0, 400.0)) * 8.0 + timeOffset; //subtracting 400 moves the SDF up, mutiplying by 8 basically increases floor points in the noise (noise grid frequency)
+  colour = DrawMountains(colour, vec3(0.5), mountainCoords, 6000.0);
+
+  mountainCoords = (pixelCoords - vec2(0.0, 360.0)) * 4.0 + timeOffset;
+  colour = DrawMountains(colour, vec3(0.45), mountainCoords, 3200.0);
+
+  mountainCoords = (pixelCoords - vec2(0.0, 280.0)) * 2.0 + timeOffset;
+  colour = DrawMountains(colour, vec3(0.4), mountainCoords, 1600.0);
+
+  mountainCoords = (pixelCoords - vec2(0.0, 150.0)) * 1.0 + timeOffset;
+  colour = DrawMountains(colour, vec3(0.35), mountainCoords, 800.0);
+
+  mountainCoords = (pixelCoords - vec2(0.0, -100.0)) * 0.5 + timeOffset;
+  colour = DrawMountains(colour, vec3(0.3), mountainCoords, 400.0);
+
+  mountainCoords = (pixelCoords - vec2(0.0, -500.0)) * 0.25 + timeOffset;
+  colour = DrawMountains(colour, vec3(0.25), mountainCoords, 200.0);
+
+  mountainCoords = (pixelCoords - vec2(0.0, -1400.0)) * 0.125 + timeOffset;
+  colour = DrawMountains(colour, vec3(0.2), mountainCoords, 0.0);
+
+  
 
   gl_FragColor = vec4(colour, 1.0);
 }

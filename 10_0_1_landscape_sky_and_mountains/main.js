@@ -47,7 +47,7 @@ class MainThreeJSClass {
 
     onWindowResize() {
       this.renderer.setSize(window.innerWidth, window.innerHeight);
-      this.camera.aspect = window.innerWidth / window.innerHeight;
+      // this.camera.aspect = window.innerWidth / window.innerHeight;
       this.camera.updateProjectionMatrix();
       this.material.uniforms.resolution.value = new THREE.Vector2(window.innerWidth, window.innerHeight);
       // console.log(this.material.uniforms.resolution.value);
