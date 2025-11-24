@@ -60,6 +60,7 @@ float fbm(vec3 seed, int octaves, float persistance, float lacunarity) {
   }
 
   total /= normalization; // normalization is basically the sum of all amplitudes used, so dividing by it ensure result ends up normalized (up to 1.0)
+  total = smoothstep(-1.0, 1.0, total); // not having this cause the closest moutina to not be visible... WHY?!?!?!?!
   return total;
 }
 
@@ -105,9 +106,9 @@ vec3 DrawMountains(vec3 background, vec3 mountainColour, vec2 pixelCoords, float
   float sdfMountain = pixelCoords.y - mountainLine; // signed distance from the mountain surface (the sine wave basically)
   
   float blur = 1.0; // this blurs all mountains equally
-  blur += smoothstep(500.0, 6000.0, depth) * 128.0; // blurs mountains starting from distance 200 (close mountains will basically have NO blur - we need to add that separately)
+  blur += smoothstep(200.0, 6000.0, depth) * 128.0; // blurs mountains starting from distance 200 (close mountains will basically have NO blur - we need to add that separately)
   
-  blur += smoothstep(500.0, -500.0, depth) * 128.0;
+  blur += smoothstep(200.0, -1400.0, depth) * 128.0;
   
   vec3 colour = mix(mountainColour, background, smoothstep(0.0, blur, sdfMountain));
 
@@ -141,7 +142,7 @@ void main() {
   mountainCoords = (pixelCoords - vec2(0.0, -500.0)) * 0.25 + timeOffset;
   colour = DrawMountains(colour, vec3(0.25), mountainCoords, 200.0);
 
-  // for some reason, this mountain chain is not visible, probably something in the way te camera or pixels or whatever are set up in main.js
+  // for some reason, this mountain chain is not visible
   mountainCoords = (pixelCoords - vec2(0.0, -1400.0)) * 0.125 + timeOffset;
   colour = DrawMountains(colour, vec3(0.2), mountainCoords, 0.0);
 
