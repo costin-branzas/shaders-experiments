@@ -141,6 +141,7 @@ void main() {
   mountainCoords = (pixelCoords - vec2(0.0, -500.0)) * 0.25 + timeOffset;
   colour = DrawMountains(colour, vec3(0.25), mountainCoords, 200.0);
 
+  // for some reason, this mountain chain is not visible, probably something in the way te camera or pixels or whatever are set up in main.js
   mountainCoords = (pixelCoords - vec2(0.0, -1400.0)) * 0.125 + timeOffset;
   colour = DrawMountains(colour, vec3(0.2), mountainCoords, 0.0);
 
