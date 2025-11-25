@@ -106,7 +106,7 @@ float turbulenceFbm(vec3 seed, int octaves, float persistance, float lacunarity)
   }
 
   total /= normalization; // normalization is basically the sum of all amplitudes used, so dividing by it ensure result ends up normalized (up to 1.0)
- 
+  total = smoothstep(-1.0, 1.0, total); // this makes a really big difference for some reason
   // total *= total;
   return total;
 }
