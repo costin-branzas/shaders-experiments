@@ -61,6 +61,9 @@ float fbm(vec3 seed, int octaves, float persistance, float lacunarity) {
 
   total /= normalization; // normalization is basically the sum of all amplitudes used, so dividing by it ensure result ends up normalized (up to 1.0)
   total = smoothstep(-1.0, 1.0, total); // not having this cause the closest moutina to not be visible... WHY?!?!?!?!
+  //after experimenting, i understood that in this case, smoothstep (not only, but) MOSTLY, ensures that the values are remaped from -1:1, to 0:1, so in our case it basically brings the mountains "up" on the screen because noise valuies are "bigger" (above 0)
+  // as proof of this, remap does almost the same thing, and all mountain chains are visible, (smoothstep also drives values a bit closer to the edge so it "accentuates" the slopes of the mountains a little bit)
+  // total = remap(total, -1.0, 1.0, 0.0, 1.0);
   return total;
 }
 
