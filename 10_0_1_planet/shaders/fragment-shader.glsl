@@ -130,22 +130,22 @@ vec3 hash3( vec3 p ) // replace this by something better
 	return -1.0 + 2.0*fract(sin(p)*43758.5453123);
 }
 
-float noise( in vec3 p )
-{
-  vec3 i = floor( p );
-  vec3 f = fract( p );
+// float noise( in vec3 p )
+// {
+//   vec3 i = floor( p );
+//   vec3 f = fract( p );
 	
-	vec3 u = f*f*(3.0-2.0*f);
+// 	vec3 u = f*f*(3.0-2.0*f);
 
-  return mix( mix( mix( dot( hash3( i + vec3(0.0,0.0,0.0) ), f - vec3(0.0,0.0,0.0) ), 
-                        dot( hash3( i + vec3(1.0,0.0,0.0) ), f - vec3(1.0,0.0,0.0) ), u.x),
-                   mix( dot( hash3( i + vec3(0.0,1.0,0.0) ), f - vec3(0.0,1.0,0.0) ), 
-                        dot( hash3( i + vec3(1.0,1.0,0.0) ), f - vec3(1.0,1.0,0.0) ), u.x), u.y),
-              mix( mix( dot( hash3( i + vec3(0.0,0.0,1.0) ), f - vec3(0.0,0.0,1.0) ), 
-                        dot( hash3( i + vec3(1.0,0.0,1.0) ), f - vec3(1.0,0.0,1.0) ), u.x),
-                   mix( dot( hash3( i + vec3(0.0,1.0,1.0) ), f - vec3(0.0,1.0,1.0) ), 
-                        dot( hash3( i + vec3(1.0,1.0,1.0) ), f - vec3(1.0,1.0,1.0) ), u.x), u.y), u.z );
-}
+//   return mix( mix( mix( dot( hash3( i + vec3(0.0,0.0,0.0) ), f - vec3(0.0,0.0,0.0) ), 
+//                         dot( hash3( i + vec3(1.0,0.0,0.0) ), f - vec3(1.0,0.0,0.0) ), u.x),
+//                    mix( dot( hash3( i + vec3(0.0,1.0,0.0) ), f - vec3(0.0,1.0,0.0) ), 
+//                         dot( hash3( i + vec3(1.0,1.0,0.0) ), f - vec3(1.0,1.0,0.0) ), u.x), u.y),
+//               mix( mix( dot( hash3( i + vec3(0.0,0.0,1.0) ), f - vec3(0.0,0.0,1.0) ), 
+//                         dot( hash3( i + vec3(1.0,0.0,1.0) ), f - vec3(1.0,0.0,1.0) ), u.x),
+//                    mix( dot( hash3( i + vec3(0.0,1.0,1.0) ), f - vec3(0.0,1.0,1.0) ), 
+//                         dot( hash3( i + vec3(1.0,1.0,1.0) ), f - vec3(1.0,1.0,1.0) ), u.x), u.y), u.z );
+// }
 
 float fbm(vec3 p, int octaves, float persistence, float lacunarity, float exponentiation) {
   float amplitude = 0.5;
@@ -169,12 +169,28 @@ float fbm(vec3 p, int octaves, float persistence, float lacunarity, float expone
 }
 
 
+vec3 GenerateStars(vec2 pixelCoords) {
+  float cellWidth = 300.0;
+
+  // i believe cellCoords is a bad name, this basically begins being 1 at the center of each cell, and then increases as we go up and right
+  vec2 cellCoords = (fract(pixelCoords / cellWidth) - 0.5) * cellWidth; // multiplying with cell width just saturates the gradient ... not sure why this is done
+
+  float distToStar = length(cellCoords); // basically distance to center of cell
+  float starRadius = 4.0;
+  // float glow = smoothstep(starRadius + 1.0, starRadius, distToStar); // inverting 1st 2 params inverts the colour
+  float glow = exp(-2.0 * distToStar / starRadius); // exp = e^...
+  
+  vec3 colour = vec3(glow);
+
+  return colour;
+}
+
+
 void main() {
   vec2 pixelCoords = (v_uv - 0.5) * resolution; // substracting 0.5 from v_uv will basically make the 0,0 coordinate be in the center of the screen, as oposed to having it at the bottom left corner
   vec3 colour = vec3(0.0, 0.0, 0.0);
   
-  float noiseSample = fbm(vec3(pixelCoords/resolution * 2.0, time * 0.2), 1, 0.5, 2.0, 2.0);
-  colour = vec3(noiseSample);
+  colour = GenerateStars(pixelCoords);
 
   gl_FragColor = vec4(colour, 1.0);
 }
