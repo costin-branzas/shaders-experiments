@@ -222,12 +222,13 @@ void main() {
 
   colour = AddGrid(pixelCoords, colour, vec3(1.0, 0.0, 0.0), max(resolution.x, resolution.y), 1.0);
 
+  // sin and cos just for warm up before fbm stuff
   // colour = AddSinFunction(pixelCoords, colour, vec3(0.0, 0.0, 1.0), 5.0);
   
   // colour = AddCosFunction(pixelCoords, colour, vec3(0.0, 1.0, 1.0), 5.0);
   
   
-  
+  // fukin about with fbm
   colour = AddFbmNoSmoothstepFunction(pixelCoords, colour, vec3(1.0, 0.0, 0.0), 3.0);
   
   colour = AddFbmSmoothstepFunction(pixelCoords, colour, vec3(0.0, 1.0, 0.0), 3.0);
