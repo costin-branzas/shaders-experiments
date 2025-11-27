@@ -140,6 +140,8 @@ vec3 AddGrid(vec2 pixelCoords, vec3 originalColour, vec3 gridColour, float gridS
 
 vec3 AddSinFunction(vec2 pixelCoords, vec3 originalColour, vec3 plotColour, float plotThickness) {
   float y = sin(pixelCoords.x * 30.0 / resolution.x); // 0-1, increase the x coord so we see more along the x axis
+  // y = smoothstep(-1.0, 1.0, y); // i see how smoothstep works - it moves more of the values towards the edges, makes sense given that it needs to "smooth" transitions towards these edges
+  // y = remap(y, -1.0, 1.0, 0.0, 1.0);
   //map to vertical resoltion
   y *= resolution.y / 2.0 * 0.5;
 
@@ -223,17 +225,17 @@ void main() {
   colour = AddGrid(pixelCoords, colour, vec3(1.0, 0.0, 0.0), max(resolution.x, resolution.y), 1.0);
 
   // sin and cos just for warm up before fbm stuff
-  // colour = AddSinFunction(pixelCoords, colour, vec3(0.0, 0.0, 1.0), 5.0);
+  colour = AddSinFunction(pixelCoords, colour, vec3(0.0, 0.0, 1.0), 5.0);
   
   // colour = AddCosFunction(pixelCoords, colour, vec3(0.0, 1.0, 1.0), 5.0);
   
   
   // fukin about with fbm
-  colour = AddFbmNoSmoothstepFunction(pixelCoords, colour, vec3(1.0, 0.0, 0.0), 3.0);
+  // colour = AddFbmNoSmoothstepFunction(pixelCoords, colour, vec3(1.0, 0.0, 0.0), 3.0);
   
-  colour = AddFbmSmoothstepFunction(pixelCoords, colour, vec3(0.0, 1.0, 0.0), 3.0);
+  // colour = AddFbmSmoothstepFunction(pixelCoords, colour, vec3(0.0, 1.0, 0.0), 3.0);
   
-  colour = AddFbmRemapFunction(pixelCoords, colour, vec3(0.0, 0.0, 1.0), 3.0);
+  // colour = AddFbmRemapFunction(pixelCoords, colour, vec3(0.0, 0.0, 1.0), 3.0);
 
   gl_FragColor = vec4(colour, 1.0);
 }
