@@ -65,6 +65,9 @@ float fbmNoSmoothstep(vec3 seed, int octaves, float persistance, float lacunarit
   //the noise function returns values in the range -1 to 1. 
   //By applying smoothstep(-1.0, 1.0, total), we effectively clamp the output to the range [0, 1] while also smoothing the transition at the edges.
   //meaning that we should get almost the same efect if we simply remap (linearly), it will move the values towards 0-1 but it will not make transitions as smooth, the noise will be more "rough" i think - see fbm2 to check it's output
+
+  // hmmm - uplon plotting them, it actually seems that the smoothstep is actually emphasizing the graph, which thinking about it DOES make sense, because it basically moves values towards the edges so the graph actually becomes more agressive, hopefully now i've understood it...
+
   // total = smoothstep(-1.0, 1.0, total);
   return total;
 }
@@ -85,10 +88,7 @@ float fbmSmoothstep(vec3 seed, int octaves, float persistance, float lacunarity)
 
   total /= normalization; // normalization is basically the sum of all amplitudes used, so dividing by it ensure result ends up normalized (up to 1.0)
   
-  //regardin the smoothstep, i think i understand what it's doing: 
-  //the noise function returns values in the range -1 to 1. 
-  //By applying smoothstep(-1.0, 1.0, total), we effectively clamp the output to the range [0, 1] while also smoothing the transition at the edges.
-  //meaning that we should get almost the same efect if we simply remap (linearly), it will move the values towards 0-1 but it will not make transitions as smooth, the noise will be more "rough" i think - see fbm2 to check it's output
+  //regardin the smoothstep, see explanation in fbm function above (fbmNoSmoothstep): 
   total = smoothstep(-1.0, 1.0, total);
   return total;
 }
@@ -109,7 +109,7 @@ float fbmRemap(vec3 seed, int octaves, float persistance, float lacunarity) {
 
   total /= normalization; // normalization is basically the sum of all amplitudes used, so dividing by it ensure result ends up normalized (up to 1.0)
   
-  //see decription in fbm1, this should basically produce results almost identical to that function, just a bit rougher
+  //regardin the smoothstep, see explanation in fbm function above (fbmNoSmoothstep): 
   // total = smoothstep(-1.0, 1.0, total);
   total = remap(total, -1.0, 1.0, 0.0, 1.0);
   return total;
