@@ -130,22 +130,22 @@ vec3 hash3( vec3 p ) // replace this by something better
 	return -1.0 + 2.0*fract(sin(p)*43758.5453123);
 }
 
-// float noise( in vec3 p )
-// {
-//   vec3 i = floor( p );
-//   vec3 f = fract( p );
+float noise( in vec3 p )
+{
+  vec3 i = floor( p );
+  vec3 f = fract( p );
 	
-// 	vec3 u = f*f*(3.0-2.0*f);
+	vec3 u = f*f*(3.0-2.0*f);
 
-//   return mix( mix( mix( dot( hash3( i + vec3(0.0,0.0,0.0) ), f - vec3(0.0,0.0,0.0) ), 
-//                         dot( hash3( i + vec3(1.0,0.0,0.0) ), f - vec3(1.0,0.0,0.0) ), u.x),
-//                    mix( dot( hash3( i + vec3(0.0,1.0,0.0) ), f - vec3(0.0,1.0,0.0) ), 
-//                         dot( hash3( i + vec3(1.0,1.0,0.0) ), f - vec3(1.0,1.0,0.0) ), u.x), u.y),
-//               mix( mix( dot( hash3( i + vec3(0.0,0.0,1.0) ), f - vec3(0.0,0.0,1.0) ), 
-//                         dot( hash3( i + vec3(1.0,0.0,1.0) ), f - vec3(1.0,0.0,1.0) ), u.x),
-//                    mix( dot( hash3( i + vec3(0.0,1.0,1.0) ), f - vec3(0.0,1.0,1.0) ), 
-//                         dot( hash3( i + vec3(1.0,1.0,1.0) ), f - vec3(1.0,1.0,1.0) ), u.x), u.y), u.z );
-// }
+  return mix( mix( mix( dot( hash3( i + vec3(0.0,0.0,0.0) ), f - vec3(0.0,0.0,0.0) ), 
+                        dot( hash3( i + vec3(1.0,0.0,0.0) ), f - vec3(1.0,0.0,0.0) ), u.x),
+                   mix( dot( hash3( i + vec3(0.0,1.0,0.0) ), f - vec3(0.0,1.0,0.0) ), 
+                        dot( hash3( i + vec3(1.0,1.0,0.0) ), f - vec3(1.0,1.0,0.0) ), u.x), u.y),
+              mix( mix( dot( hash3( i + vec3(0.0,0.0,1.0) ), f - vec3(0.0,0.0,1.0) ), 
+                        dot( hash3( i + vec3(1.0,0.0,1.0) ), f - vec3(1.0,0.0,1.0) ), u.x),
+                   mix( dot( hash3( i + vec3(0.0,1.0,1.0) ), f - vec3(0.0,1.0,1.0) ), 
+                        dot( hash3( i + vec3(1.0,1.0,1.0) ), f - vec3(1.0,1.0,1.0) ), u.x), u.y), u.z );
+}
 
 float fbm(vec3 p, int octaves, float persistence, float lacunarity, float exponentiation) {
   float amplitude = 0.5;
@@ -168,21 +168,92 @@ float fbm(vec3 p, int octaves, float persistence, float lacunarity, float expone
   return total;
 }
 
-
-vec3 GenerateStars(vec2 pixelCoords) {
-  float cellWidth = 300.0;
-
+//costin's version
+vec3 GenerateGridStars(vec2 pixelCoords, float starRadius, float cellWidth, float seed, bool twinkle) {
   // i believe cellCoords is a bad name, this basically begins being 1 at the center of each cell, and then increases as we go up and right
-  vec2 cellCoords = (fract(pixelCoords / cellWidth) - 0.5) * cellWidth; // multiplying with cell width just saturates the gradient ... not sure why this is done
-
-  float distToStar = length(cellCoords); // basically distance to center of cell
-  float starRadius = 4.0;
-  // float glow = smoothstep(starRadius + 1.0, starRadius, distToStar); // inverting 1st 2 params inverts the colour
-  float glow = exp(-2.0 * distToStar / starRadius); // exp = e^...
+  vec2 cellCoords = (fract(pixelCoords / cellWidth) - 0.5) * cellWidth; // multiplying with cell width just saturates (makes it > 1 quickly) the gradient ... In the end: this is 0 at the cell center, and very quickly increases as we move away
+  vec2 cellID = floor(pixelCoords / cellWidth) + seed / 100.0; // this will be the same 2 numbers everywhere in the "current" cell
+  vec3 cellHashValue = hash3(vec3(cellID, 0.0));
+  // return cellHashValue; // just to prove that we have random values in this
   
-  vec3 colour = vec3(glow);
+  float starBrightness = saturate(cellHashValue.z);
+
+  vec2 starPosition = vec2(0.0);
+  starPosition += cellHashValue.xy * (cellWidth * 0.5 - starRadius * 4.0);
+  
+  float distToStar = length(cellCoords - starPosition); // basically distance to center of cell
+
+  // float glow = smoothstep(starRadius + 1.0, starRadius, distToStar); // inverting 1st 2 params inverts the colour
+  float glow = exp(-2.0 * distToStar / starRadius); // exp = e^... // this will basically end up being 1 right near the star center, and then decrease exp as we move away, just like a star glow
+
+  //twinkle
+  if (twinkle) {
+    float noiseSample = noise(vec3(cellID, time * 1.5));
+    float twinkleSize = remap(noiseSample, -1.0, 1.0, 1.0, 0.1) * starRadius * 6.0;
+    vec2 absDist = abs(cellCoords - starPosition);
+    // float twinkleValue = smoothstep(1.0 , 0.0, absDist.y); // horizontal line appears as we near in on the star vertically
+    float twinkleValue = smoothstep(starRadius * 0.25, 0.0, absDist.y) * smoothstep(twinkleSize, 0.0, absDist.x); // mutiply with va;lue determined by how close we are horizpontaly to fade out the twinkle as we get further from the star
+
+    twinkleValue += smoothstep(starRadius * 0.25, 0.0, absDist.x) * smoothstep(twinkleSize, 0.0, absDist.y); // mutiply with va;lue determined by how close we are horizpontaly to fade out the twinkle as we get further from the star
+
+    glow += twinkleValue;
+  }
+
+  vec3 colour = vec3(glow * starBrightness);
 
   return colour;
+}
+
+// simon's version
+vec3 GenerateGridStarsSimon(
+    vec2 pixelCoords, float starRadius, float cellWidth,
+    float seed, bool twinkle) {
+  vec2 cellCoords = (fract(pixelCoords / cellWidth) - 0.5) * cellWidth;
+  vec2 cellID = floor(pixelCoords / cellWidth) + seed / 100.0;
+  vec3 cellHashValue = hash3(vec3(cellID, 0.0));
+
+  float starBrightness = saturate(cellHashValue.z);
+  vec2 starPosition = vec2(0.0);
+  starPosition += cellHashValue.xy * (cellWidth * 0.5 - starRadius * 4.0);
+  float distToStar = length(cellCoords - starPosition); // i had a + instead of - here, and the stars glow was for some reason less pronounced
+  // float glow = smoothstep(starRadius + 1.0, starRadius, distToStar);
+  float glow = exp(-2.0 * distToStar / starRadius);
+
+  if (twinkle) {
+    float noiseSample = noise(vec3(cellID, time * 1.5));
+    float twinkleSize = (
+        remap(noiseSample, -1.0, 1.0, 1.0, 0.1) * starRadius * 6.0);
+    vec2 absDist = abs(cellCoords - starPosition);
+    float twinkleValue = smoothstep(starRadius * 0.25, 0.0, absDist.y) *
+        smoothstep(twinkleSize, 0.0, absDist.x);
+    twinkleValue += smoothstep(starRadius * 0.25, 0.0, absDist.x) *
+        smoothstep(twinkleSize, 0.0, absDist.y);
+    glow += twinkleValue;
+  }
+
+  return vec3(glow * starBrightness);
+}
+
+
+vec3 GenerateStars(vec2 pixelCoords) {
+  vec3 stars = vec3(0.0);
+
+  float size = 4.0;
+  float cellWidth = 500.0;
+  for (float i = 0.0; i <= 2.0; i += 1.0) {
+    stars += GenerateGridStars(pixelCoords, size, cellWidth, i, true);
+    // stars += GenerateGridStarsSimon(pixelCoords, size, cellWidth, i, true);
+    size *= 0.5;
+    cellWidth *= 0.35;
+  }
+
+  for (float i = 3.0; i < 5.0; i += 1.0) {
+    stars += GenerateGridStars(pixelCoords, size, cellWidth, i, false);
+    size *= 0.5;
+    cellWidth *= 0.35;
+  }
+
+  return stars;
 }
 
 
