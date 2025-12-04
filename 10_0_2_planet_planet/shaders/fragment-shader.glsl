@@ -227,11 +227,29 @@ vec3 GenerateStars(vec2 pixelCoords) {
 }
 
 
+float sdfCircle(vec2 p, float r) {
+  return length(p) - r;
+}
+
+
+vec3 DrawPlanet(vec2 pixelCoords, vec3 originalColour) {
+  float d = sdfCircle(pixelCoords, 400.0); //distance to planet
+
+  vec3 planetColour = vec3(1.0);
+
+  vec3 colour = mix(originalColour, planetColour, smoothstep(0.0, -1.0, d));
+
+  return colour;
+}
+
+
 void main() {
   vec2 pixelCoords = (v_uv - 0.5) * resolution; // substracting 0.5 from v_uv will basically make the 0,0 coordinate be in the center of the screen, as oposed to having it at the bottom left corner
   vec3 colour = vec3(0.0, 0.0, 0.0);
   
   colour = GenerateStars(pixelCoords);
+
+  colour = DrawPlanet(pixelCoords, colour);
 
   gl_FragColor = vec4(colour, 1.0);
 }
