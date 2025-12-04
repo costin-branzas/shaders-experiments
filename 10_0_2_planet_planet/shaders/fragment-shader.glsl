@@ -236,6 +236,26 @@ vec3 DrawPlanet(vec2 pixelCoords, vec3 originalColour) {
   float d = sdfCircle(pixelCoords, 400.0); //distance to planet
 
   vec3 planetColour = vec3(1.0);
+  
+  if(d <= 0.0) {
+    // the next 3 lines are basically an implementation for sphere quation (x^2 + y^2 + z^2 = r^1)
+    // these are the lines that basicalyl give us a 3d looking sphere
+    float x = pixelCoords.x / 400.0; // we know x
+    float y = pixelCoords.y / 400.0; // we know y
+    float z = sqrt(1.0 - x * x - y * y); // we calculate z
+
+    // planetColour = vec3(z); // this would basically be white in the middle, and slowly fade away on the sides giving the specific appearance of a sphere :)
+
+    vec3 viewNormal = vec3(x, y, z);
+    vec3 wsPosition = viewNormal;
+
+    vec3 noiseCoord = wsPosition * 2.0; // multiply by 2 to increase noise density basically the noise space is zoomed out, capturing a larger portion of the noise - hence more details
+    float noiseSample = fbm(noiseCoord, 6, 0.5, 2.0, 2.0); // we are basically sampling from the 3d space of the noise along the sphere surface, so we colour the sphere with the value at that exact point in the 3d noise space
+    planetColour = vec3(noiseSample);
+
+    //colouring
+    
+  }
 
   vec3 colour = mix(originalColour, planetColour, smoothstep(0.0, -1.0, d));
 
