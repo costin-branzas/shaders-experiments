@@ -235,7 +235,18 @@ float map(vec3 pos) {
   return fbm(pos, 6, 0.5, 2.0, 4.0);
 }
 
-vec3 calcNormal(vec3 pos, vec3 n);
+vec3 calcNormal(vec3 pos, vec3 n) {
+  vec2 e = vec2(0.0001, 0.0); // just place to store a small offset, we could have simply used hard coded vec2s below, instead we use this "e" (offset)
+  vec3 normal = normalize(
+    n + -500.0 * vec3(
+      map(pos + e.xyy) - map(pos - e.xyy),
+      map(pos + e.yxy) - map(pos - e.yxy),
+      map(pos + e.yyx) - map(pos - e.yyx)
+    )
+  );
+
+  return normal;
+}
 
 vec3 DrawPlanet(vec2 pixelCoords, vec3 originalColour) {
   float d = sdfCircle(pixelCoords, 400.0); //distance to planet
@@ -282,17 +293,19 @@ vec3 DrawPlanet(vec2 pixelCoords, vec3 originalColour) {
   
     //Lighting
     vec3 wsLightDir = normalize(vec3(0.5, 1.0, 0.5));
-    float dp = max(0.0, dot(wsLightDir, wsNormal));
+    vec3 wsSurfaceNormal = calcNormal(noiseCoord, wsNormal);
+    float dp = max(0.0, dot(wsLightDir, wsSurfaceNormal));
 
     // planetColour = vec3(dp); // just to see the directional light
     vec3 lightColour = vec3(0.75);
     vec3 ambient = vec3(0.02);
     vec3 diffuse = lightColour * dp;
 
-    vec3 r = normalize(reflect(-wsLightDir, wsNormal)); // reflection of the diffuse light
+    vec3 r = normalize(reflect(-wsLightDir, wsSurfaceNormal)); // reflection of the diffuse light
     float phongValue = max(0.0, dot(wsViewDir, r));
     phongValue = pow(phongValue, 4.0);
     vec3 specular = vec3(phongValue) * 0.5 * diffuse;
+    // specular = vec3(0.0);
 
 
     vec3 planetShading = planetColour * (diffuse + ambient) + specular;
