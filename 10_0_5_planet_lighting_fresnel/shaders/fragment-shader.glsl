@@ -235,10 +235,10 @@ float map(vec3 pos) {
   return fbm(pos, 6, 0.5, 2.0, 4.0);
 }
 
-vec3 calcNormal(vec3 pos, vec3 n) {
-  vec2 e = vec2(0.0001, 0.0); // just place to store a small offset, we could have simply used hard coded vec2s below, instead we use this "e" (offset)
+vec3 calcNormal(vec3 pos, vec3 originalSurfaceNormal) {
+  vec2 e = vec2(0.00010, 0.0); // just place to store a small offset, we could have simply used hard coded vec2s below, instead we use this "e" (offset) // by increasing the offset we can sample a bit further away from the current point, which can increase the "slope" of the normals, so lighting looks more dramatic
   vec3 normal = normalize(
-    n + -500.0 * vec3(
+    originalSurfaceNormal - 500.0 * vec3( //the 500- 1000 number given here is basically a constant that exagerates the gradients a bit so lighting is more dramatic ("steeper" gradients in the noise)
       map(pos + e.xyy) - map(pos - e.xyy),
       map(pos + e.yxy) - map(pos - e.yxy),
       map(pos + e.yyx) - map(pos - e.yyx)
@@ -293,7 +293,14 @@ vec3 DrawPlanet(vec2 pixelCoords, vec3 originalColour) {
   
     //Lighting
     vec3 wsLightDir = normalize(vec3(0.5, 1.0, 0.5));
-    vec3 wsSurfaceNormal = calcNormal(noiseCoord, wsNormal);
+    vec3 wsSurfaceNormal = calcNormal(noiseCoord, wsNormal); // manually calculated normal
+
+    //calculating normals from dfdx and dfdy - for reasons i don;t quite understand, the dFdx and dFdy functions return very low "resolution" results, so the lighting looks super low res
+    // vec3 wsSurfacePosition = wsPosition + wsNormal * noiseSample * 0.5;
+    // vec3 wsSurfaceNormal = normalize(
+    //   cross(dFdx(wsSurfacePosition), dFdy(wsSurfacePosition))
+    // );
+
     float dp = max(0.0, dot(wsLightDir, wsSurfaceNormal));
 
     // planetColour = vec3(dp); // just to see the directional light
@@ -311,6 +318,11 @@ vec3 DrawPlanet(vec2 pixelCoords, vec3 originalColour) {
     vec3 planetShading = planetColour * (diffuse + ambient) + specular;
     
     planetColour = planetShading;
+
+    //fresnel (atmosphere scaterring at the "edges")
+    float fresnel = smoothstep(1.0, 0.1, viewNormal.z);
+    fresnel = pow(fresnel, 8.0) * dp;
+    planetColour = mix(planetColour, vec3(0.0, 0.5, 1.0), fresnel);
   }
 
   vec3 colour = mix(originalColour, planetColour, smoothstep(0.0, -1.0, d));
