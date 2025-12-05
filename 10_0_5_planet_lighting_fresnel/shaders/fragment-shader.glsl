@@ -320,7 +320,7 @@ vec3 DrawPlanet(vec2 pixelCoords, vec3 originalColour) {
     planetColour = planetShading;
 
     //fresnel (atmosphere scaterring at the "edges")
-    float fresnel = smoothstep(1.0, 0.1, viewNormal.z);
+    float fresnel = smoothstep(1.0, 0.1, viewNormal.z); // playing with smoothsteps parameters here will change the scattering spread over the planet surface
     fresnel = pow(fresnel, 8.0) * dp;
     planetColour = mix(planetColour, vec3(0.0, 0.5, 1.0), fresnel);
   }
