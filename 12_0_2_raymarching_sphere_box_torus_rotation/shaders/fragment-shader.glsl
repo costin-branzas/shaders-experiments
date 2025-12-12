@@ -50,7 +50,8 @@ float map(vec3 pos) {
   
   // float dist = sdfBox(pos - vec3(0.0, 0.0, 5.0), vec3(1.0, 1.0, 1.0));
 
-  float dist = sdfTorus(pos - vec3(0.0, 0.0, 5.0), vec2(0.5, 0.2));
+  float dist = sdfTorus(pos * RotateX(time * 0.4) - vec3(0.0, 0.0, 0.0), vec2(0.5, 0.2));
+  // float dist = sdfTorus(pos * RotateX(time * 0.1) - vec3(0.0, 0.0, 5.0), vec2(0.5, 0.2));
   
   return dist;
 }
@@ -127,7 +128,7 @@ vec3 RayMarchCostin(vec3 rayOrigin, vec3 rayDirection) {
 void main() {
   vec2 pixelCoords = (v_uv - 0.5) * resolution; // substracting 0.5 from v_uv will basically make the 0,0 coordinate be in the center of the screen, as oposed to having it at the bottom left corner
   
-  vec3 cameraPosition = vec3(0.0);
+  vec3 cameraPosition = vec3(0.0, 0.0, -5.0);
   
   vec3 rayDirection = normalize(vec3(pixelCoords * 2.0 / resolution.y, 1.0));
   // vec3 rayDirection = normalize(vec3(pixelCoords / resolution, 1.0));
