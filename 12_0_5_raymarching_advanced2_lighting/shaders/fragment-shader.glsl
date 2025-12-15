@@ -90,6 +90,12 @@ vec3 CalculateNormal(vec3 pos) {
   return normalize(n);
 }
 
+vec3 CalculateLighting(vec3 pos, vec3 normal, vec3 lightColour, vec3 lightDir) {
+  float dp = saturate(dot(normal, lightDir));
+  
+  return lightColour * dp;
+}
+
 // Performs sphere tracing for the scene.
 const int NUM_STEPS = 256;
 const float MAX_DIST = 1000.0;
@@ -125,10 +131,14 @@ vec3 RayMarch(vec3 cameraOrigin, vec3 cameraDir) {
     // Case 3: Loop around, in reality, do nothing.
   }
 
-
   // this is hit if the scene is hit OR if the max number of steps was exceded
-  // return material.colour;
-  return CalculateNormal(pos);
+
+  // lighting
+  vec3 lightDir = normalize(vec3(1.0, 2.0, -1.0)); // from the right, up and from the camera
+  vec3 normal = CalculateNormal(pos);
+  vec3 lighting = CalculateLighting(pos, normal, vec3(1.0), lightDir);
+
+  return material.colour * lighting;
 }
 
 
