@@ -73,7 +73,7 @@ MaterialData map(vec3 pos) {
   result.colour = dist < result.dist ? RED : result.colour;
   result.dist = min(result.dist, dist);
 
-  dist = sdfBox(pos - vec3(2.0, -0.85, 5.0), vec3(1.0));
+  dist = sdfBox(pos - vec3(2.0, -0.6, 5.0), vec3(1.0));
   result.colour = dist < result.dist ? BLUE : result.colour;
   result.dist = min(result.dist, dist);
 
@@ -108,6 +108,19 @@ float CalculateShadow(vec3 pos, vec3 lightDir) {
   }
 
   return 1.0;
+}
+
+float CalculateAO(vec3 pos, vec3 normal) {
+  float ao = 0.0;
+  float stepSize = 0.1;
+
+  for(float i = 0.0; i < 5.0; ++i) {
+    float distFactor = 1.0 / pow(2.0, i);
+
+    ao += distFactor * (i * stepSize - map(pos + normal * i * stepSize).dist);
+  }
+
+  return 1.0 - ao;
 }
 
 // Performs sphere tracing for the scene.
@@ -154,7 +167,10 @@ vec3 RayMarch(vec3 cameraOrigin, vec3 cameraDir) {
   vec3 lighting = CalculateLighting(pos, normal, vec3(1.0), lightDir);
   lighting *= shadowed;
 
-  return material.colour * lighting;
+  float ao = CalculateAO(pos, normal);
+  return vec3(ao);
+
+  // return material.colour * lighting;
 }
 
 
